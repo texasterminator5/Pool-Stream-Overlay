@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920, height=1080, initial-scale=1">
+  <title>Scoreboard Overlay</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: transparent;
+    }
+    .wrap {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 0;
+      margin-bottom: 48px;
+    }
+    .box {
+      width: 360px;
+      min-width: 280px;
+      padding: 8px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: center;
+      gap: 2px;
+    }
+    .box.left {
+      background:
+        linear-gradient(180deg, rgba(91,33,182,0.85) 0%, transparent 45%, rgba(139,92,246,0.4) 100%),
+        linear-gradient(90deg, rgba(91,33,182,0.85) 0%, transparent 45%, rgba(139,92,246,0.4) 100%),
+        #7c3aed;
+      border-radius: 10px 0 0 10px;
+    }
+    .box.right {
+      background:
+        linear-gradient(180deg, rgba(14,116,144,0.85) 0%, transparent 45%, rgba(34,211,238,0.4) 100%),
+        linear-gradient(270deg, rgba(14,116,144,0.85) 0%, transparent 45%, rgba(34,211,238,0.4) 100%),
+        #06b6d4;
+      border-radius: 0 10px 10px 0;
+    }
+    .row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+    .box.left .row { flex-direction: row; }
+    .box.right .row { flex-direction: row-reverse; }
+    .score-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-shrink: 0;
+      background: rgba(0,0,0,0.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 5px 14px;
+      border-radius: 8px;
+    }
+    .race-to {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.9);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+    .name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .score {
+      font-size: 36px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+      flex-shrink: 0;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="box left">
+      <div class="row">
+        <span class="name" id="team1">Team 1</span>
+        <div class="score-block">
+          <span class="race-to" id="raceToLabel">Race to 13</span>
+          <span class="score" id="score1">0</span>
+        </div>
+      </div>
+    </div>
+    <div class="box right">
+      <div class="row">
+        <span class="name" id="team2">Team 2</span>
+        <div class="score-block">
+          <span class="race-to" id="raceToLabel2">Race to 13</span>
+          <span class="score" id="score2">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var raceTo1 = params.get('raceTo1') || params.get('raceTo') || '13';
+      var raceTo2 = params.get('raceTo2') || params.get('raceTo') || '13';
+      document.getElementById('raceToLabel').textContent = 'Race to ' + raceTo1;
+      document.getElementById('raceToLabel2').textContent = 'Race to ' + raceTo2;
+      document.getElementById('team1').textContent = decodeURIComponent(params.get('team1') || 'Team 1');
+      document.getElementById('team2').textContent = decodeURIComponent(params.get('team2') || 'Team 2');
+      document.getElementById('score1').textContent = params.get('s1') || '0';
+      document.getElementById('score2').textContent = params.get('s2') || '0';
+    })();
+  </script>
+</body>
+</html>
