@@ -123,14 +123,44 @@
   <script>
     (function() {
       var params = new URLSearchParams(window.location.search);
-      var raceTo1 = params.get('raceTo1') || params.get('raceTo') || '13';
-      var raceTo2 = params.get('raceTo2') || params.get('raceTo') || '13';
-      document.getElementById('raceToLabel').textContent = 'Race to ' + raceTo1;
-      document.getElementById('raceToLabel2').textContent = 'Race to ' + raceTo2;
-      document.getElementById('team1').textContent = decodeURIComponent(params.get('team1') || 'Team 1');
-      document.getElementById('team2').textContent = decodeURIComponent(params.get('team2') || 'Team 2');
-      document.getElementById('score1').textContent = params.get('s1') || '0';
-      document.getElementById('score2').textContent = params.get('s2') || '0';
+      var room = params.get('room');
+      var dbUrl = params.get('db') ? decodeURIComponent(params.get('db')) : '';
+
+      function applyState(data) {
+        var d = data || {};
+        var team1 = (d.team1 != null ? d.team1 : 'Team 1').toString();
+        var team2 = (d.team2 != null ? d.team2 : 'Team 2').toString();
+        var s1 = (d.s1 != null ? d.s1 : 0).toString();
+        var s2 = (d.s2 != null ? d.s2 : 0).toString();
+        var raceTo1 = (d.raceTo1 != null ? d.raceTo1 : 13).toString();
+        var raceTo2 = (d.raceTo2 != null ? d.raceTo2 : 13).toString();
+        document.getElementById('raceToLabel').textContent = 'Race to ' + raceTo1;
+        document.getElementById('raceToLabel2').textContent = 'Race to ' + raceTo2;
+        document.getElementById('team1').textContent = team1;
+        document.getElementById('team2').textContent = team2;
+        document.getElementById('score1').textContent = s1;
+        document.getElementById('score2').textContent = s2;
+      }
+
+      if (room && dbUrl) {
+        var url = dbUrl.replace(/\/$/, '') + '/rooms/' + encodeURIComponent(room) + '.json';
+        function poll() {
+          fetch(url).then(function(r) { return r.json(); }).then(applyState).catch(function() {});
+        }
+        poll();
+        setInterval(poll, 2000);
+      } else {
+        var t1 = params.get('team1');
+        var t2 = params.get('team2');
+        applyState({
+          team1: t1 ? decodeURIComponent(t1) : 'Team 1',
+          team2: t2 ? decodeURIComponent(t2) : 'Team 2',
+          s1: params.get('s1') || '0',
+          s2: params.get('s2') || '0',
+          raceTo1: params.get('raceTo1') || params.get('raceTo') || '13',
+          raceTo2: params.get('raceTo2') || params.get('raceTo') || '13'
+        });
+      }
     })();
   </script>
 </body>

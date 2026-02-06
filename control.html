@@ -125,33 +125,111 @@
         <input type="number" id="s2" value="0" min="0" max="999">
       </div>
     </div>
+    <div class="live-section" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.15);">
+      <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
+        <input type="checkbox" id="liveMode" style="width: auto;">
+        <span>Live update (overlay auto-updates)</span>
+      </label>
+      <div class="field" id="firebaseField" style="margin-bottom: 10px;">
+        <label>Firebase Database URL</label>
+        <input type="text" id="firebaseUrl" placeholder="https://your-project.firebaseio.com">
+      </div>
+      <div class="field">
+        <label>Room ID (share this with the overlay URL)</label>
+        <input type="text" id="roomId" placeholder="e.g. pool-match-1">
+      </div>
+      <p style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 8px;">Paste your Firebase Realtime Database URL and a room ID. The overlay will refresh every 2 seconds.</p>
+    </div>
     <button class="btn btn-primary" id="copyUrl">Copy overlay URL</button>
     <button class="btn btn-secondary" id="openUrl">Open overlay (preview)</button>
     <div class="url-box" id="urlBox"></div>
   </div>
   <div class="toast" id="toast">URL copied to clipboard</div>
   <script>
+    var LIVE_STORAGE = 'pool-overlay-live';
+    function getState() {
+      return {
+        team1: document.getElementById('team1').value || 'Team 1',
+        team2: document.getElementById('team2').value || 'Team 2',
+        raceTo1: document.getElementById('raceTo1').value || '13',
+        raceTo2: document.getElementById('raceTo2').value || '13',
+        s1: document.getElementById('s1').value || '0',
+        s2: document.getElementById('s2').value || '0'
+      };
+    }
     function buildUrl() {
       var path = location.pathname.replace(/\/?control\.html$/, '') || '/';
       var base = location.origin + (path.endsWith('/') ? path : path + '/') + 'index.html';
+      var liveMode = document.getElementById('liveMode').checked;
+      var dbUrl = document.getElementById('firebaseUrl').value.trim();
+      var roomId = document.getElementById('roomId').value.trim();
+      if (liveMode && dbUrl && roomId) {
+        return base + '?room=' + encodeURIComponent(roomId) + '&db=' + encodeURIComponent(dbUrl);
+      }
       var params = new URLSearchParams();
-      params.set('team1', document.getElementById('team1').value || 'Team 1');
-      params.set('team2', document.getElementById('team2').value || 'Team 2');
-      params.set('raceTo1', document.getElementById('raceTo1').value || '13');
-      params.set('raceTo2', document.getElementById('raceTo2').value || '13');
-      params.set('s1', document.getElementById('s1').value || '0');
-      params.set('s2', document.getElementById('s2').value || '0');
+      var s = getState();
+      params.set('team1', s.team1);
+      params.set('team2', s.team2);
+      params.set('raceTo1', s.raceTo1);
+      params.set('raceTo2', s.raceTo2);
+      params.set('s1', s.s1);
+      params.set('s2', s.s2);
       return base + (base.includes('?') ? '&' : '?') + params.toString();
     }
     function updateUrlBox() {
       document.getElementById('urlBox').textContent = 'Overlay URL: ' + buildUrl();
     }
-    document.getElementById('team1').addEventListener('input', updateUrlBox);
-    document.getElementById('team2').addEventListener('input', updateUrlBox);
-    document.getElementById('raceTo1').addEventListener('input', updateUrlBox);
-    document.getElementById('raceTo2').addEventListener('input', updateUrlBox);
-    document.getElementById('s1').addEventListener('input', updateUrlBox);
-    document.getElementById('s2').addEventListener('input', updateUrlBox);
+    function pushToFirebase() {
+      var dbUrl = document.getElementById('firebaseUrl').value.trim();
+      var roomId = document.getElementById('roomId').value.trim();
+      if (!dbUrl || !roomId || !document.getElementById('liveMode').checked) return;
+      var url = dbUrl.replace(/\/$/, '') + '/rooms/' + encodeURIComponent(roomId) + '.json';
+      fetch(url, {
+        method: 'PUT',
+        body: JSON.stringify(getState()),
+        headers: { 'Content-Type': 'application/json' }
+      }).catch(function() {});
+    }
+    var pushDebounce;
+    function schedulePush() {
+      clearTimeout(pushDebounce);
+      pushDebounce = setTimeout(pushToFirebase, 400);
+    }
+    function randomRoomId() {
+      return 'room-' + Math.random().toString(36).slice(2, 10);
+    }
+    (function loadSaved() {
+      try {
+        var s = localStorage.getItem(LIVE_STORAGE);
+        if (s) {
+          var d = JSON.parse(s);
+          if (d.firebaseUrl) document.getElementById('firebaseUrl').value = d.firebaseUrl;
+          if (d.roomId) document.getElementById('roomId').value = d.roomId;
+          else document.getElementById('roomId').value = randomRoomId();
+          if (d.liveMode) document.getElementById('liveMode').checked = true;
+        } else {
+          document.getElementById('roomId').value = randomRoomId();
+        }
+      } catch (e) {}
+    })();
+    function saveLiveSettings() {
+      try {
+        localStorage.setItem(LIVE_STORAGE, JSON.stringify({
+          firebaseUrl: document.getElementById('firebaseUrl').value.trim(),
+          roomId: document.getElementById('roomId').value.trim(),
+          liveMode: document.getElementById('liveMode').checked
+        }));
+      } catch (e) {}
+    }
+    document.getElementById('team1').addEventListener('input', function() { updateUrlBox(); schedulePush(); });
+    document.getElementById('team2').addEventListener('input', function() { updateUrlBox(); schedulePush(); });
+    document.getElementById('raceTo1').addEventListener('input', function() { updateUrlBox(); schedulePush(); });
+    document.getElementById('raceTo2').addEventListener('input', function() { updateUrlBox(); schedulePush(); });
+    document.getElementById('s1').addEventListener('input', function() { updateUrlBox(); schedulePush(); });
+    document.getElementById('s2').addEventListener('input', function() { updateUrlBox(); schedulePush(); });
+    document.getElementById('firebaseUrl').addEventListener('change', saveLiveSettings);
+    document.getElementById('roomId').addEventListener('change', saveLiveSettings);
+    document.getElementById('liveMode').addEventListener('change', function() { saveLiveSettings(); updateUrlBox(); });
     document.getElementById('copyUrl').addEventListener('click', function() {
       var url = buildUrl();
       if (navigator.clipboard && navigator.clipboard.writeText) {
