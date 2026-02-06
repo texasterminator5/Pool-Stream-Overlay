@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1920, height=1080, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Scoreboard Overlay</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,18 +23,20 @@
       flex-direction: row;
       align-items: stretch;
       gap: 0;
-      width: 1600px;
-      height: auto;
+      width: 90%;
+      max-width: 90vw;
+      height: 80%;
+      max-height: 80vh;
     }
     .box {
       flex: 1;
       min-width: 0;
-      padding: 24px 48px;
+      padding: 2% 4%;
       display: flex;
       flex-direction: column;
       align-items: stretch;
       justify-content: center;
-      gap: 2px;
+      gap: 0.5vh;
     }
     .box.left {
       background:
@@ -70,11 +72,11 @@
       background: rgba(0,0,0,0.25);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      padding: 12px 32px;
-      border-radius: 12px;
+      padding: 1vh 2vw;
+      border-radius: 1vh;
     }
     .race-to {
-      font-size: 20px;
+      font-size: clamp(8px, 2vh, 24px);
       font-weight: 600;
       color: rgba(255,255,255,0.9);
       text-transform: uppercase;
@@ -82,7 +84,7 @@
       text-align: center;
     }
     .name {
-      font-size: 36px;
+      font-size: clamp(12px, 4vh, 48px);
       font-weight: 700;
       color: #fff;
       white-space: nowrap;
@@ -92,7 +94,7 @@
       text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
     .score {
-      font-size: 96px;
+      font-size: clamp(24px, 12vh, 160px);
       font-weight: 800;
       color: #fff;
       line-height: 1;
