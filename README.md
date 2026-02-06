@@ -24,9 +24,40 @@ A simple, transparent scoreboard overlay you can use as a **custom URL layer** i
    Resize and move the URL layer in the editor. Stream output is 16:9; edit in landscape so it matches what viewers see.
 
 4. **Updating scores**  
-   Open **control.html** (on phone or computer), change team names/scores/period, then:
-   - **Copy overlay URL** and paste it into the same Streamlabs layer (replace the old URL), or  
-   - Use a new overlay URL each time you go live with different teams/scores.
+   - **Live update (recommended):** Turn on “Live update” on the control page and set up Firebase (see [Live update with Firebase](#live-update-with-firebase)). Use one overlay URL in Streamlabs; the overlay refreshes every 2 seconds when you change scores on the control page.  
+   - **URL params only:** Change team names/scores on the control page, then **Copy overlay URL** and paste it into the Streamlabs layer (replace the old URL).
+
+## Live update with Firebase
+
+To have the overlay **auto-update** when you change scores (no pasting a new URL each time):
+
+1. **Create a Firebase project** (free):  
+   Go to [Firebase Console](https://console.firebase.google.com/) → **Add project** → follow the steps.
+
+2. **Enable Realtime Database:**  
+   In the project, go to **Build** → **Realtime Database** → **Create Database**. Choose a location, then start in **test mode** (read/write allowed for 30 days) or set [rules](https://firebase.google.com/docs/database/security) like:
+   ```json
+   {
+     "rules": {
+       "rooms": {
+         ".read": true,
+         ".write": true
+       }
+     }
+   }
+   ```
+
+3. **Copy the Database URL:**  
+   On the Realtime Database page, copy the URL at the top (e.g. `https://your-project-default-rtdb.firebaseio.com`). Do **not** add `/rooms` or `.json` — use only the base URL.
+
+4. **On the control page:**  
+   - Check **Live update (overlay auto-updates)**.  
+   - Paste the **Firebase Database URL** into the field.  
+   - Use the **Room ID** shown (or type your own, e.g. `pool-match-1`).  
+   - Click **Copy overlay URL** and paste that **single URL** into Streamlabs. You only need to do this once.
+
+5. **Use the overlay:**  
+   When you change team names or scores on the control page, the overlay in Streamlabs updates within about 2 seconds. No need to copy or paste a new URL.
 
 ## Overlay URL parameters
 
@@ -38,10 +69,12 @@ You can build the overlay URL yourself. All parameters are optional.
 | `team2`  | Team 2 name | `team2=Blue%20Squad` |
 | `s1`     | Team 1 score | `s1=10` |
 | `s2`     | Team 2 score | `s2=8` |
-| `period` | Period/round label (e.g. “Half 2”) | `period=Round%203` |
+| `raceTo1` | Race to (Team 1) | `raceTo1=13` |
+| `raceTo2` | Race to (Team 2) | `raceTo2=13` |
 
-Example:  
-`index.html?team1=Home&team2=Away&s1=21&s2=14&period=Final`
+For **live update**, the overlay URL uses `room` and `db` instead:  
+`index.html?room=YOUR_ROOM_ID&db=FIREBASE_DATABASE_URL`  
+(Use the control page to generate this URL after enabling Live update.)
 
 ## Hosting
 
@@ -135,6 +168,14 @@ In Streamlabs Mobile, add a **Custom item → URL** layer and paste the full ove
 ### Option D: Your own server (VPS / hosted)
 
 Upload both files to a directory that’s served over HTTPS. Use the full URL to `index.html` (with query params if you want) as the overlay URL in Streamlabs.
+
+## Troubleshooting: Overlay too small
+
+If the overlay looks tiny in Streamlabs:
+
+- **Streamlabs Desktop:** Double‑click the Browser Source in the Sources list → set **Width** to `1920` and **Height** to `1080`. Scene Editor browser sources should use 1920×1080 for correct sizing.
+- **Streamlabs Mobile (iOS):** The URL layer size may be limited. Push the latest `index.html` to your host and add `?v=1` (or `?v=2`, etc.) to the overlay URL to avoid cached versions.
+- **Cache:** Add `?v=2` to the end of the overlay URL to force Streamlabs to reload the page.
 
 ## Tips
 
