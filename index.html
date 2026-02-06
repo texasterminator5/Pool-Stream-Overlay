@@ -2,32 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1920, height=1080, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Scoreboard Overlay</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
-      width: 1920px;
-      height: 1080px;
+      width: 100%;
+      height: 100%;
+      min-height: 100vh;
       overflow: hidden;
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: transparent;
     }
     .wrap {
       position: absolute;
-      bottom: 0;
+      bottom: 5%;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       flex-direction: row;
       align-items: stretch;
       gap: 0;
-      margin-bottom: 48px;
+      width: min(95vw, 900px);
+      max-width: 900px;
     }
     .box {
-      width: 360px;
-      min-width: 280px;
-      padding: 8px 24px;
+      flex: 1;
+      min-width: 0;
+      padding: clamp(6px, 1.5vw, 24px) clamp(12px, 2.5vw, 48px);
       display: flex;
       flex-direction: column;
       align-items: stretch;
@@ -53,7 +55,7 @@
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: clamp(8px, 1.5vw, 16px);
       min-width: 0;
     }
     .box.left .row { flex-direction: row; }
@@ -68,11 +70,11 @@
       background: rgba(0,0,0,0.25);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      padding: 5px 14px;
-      border-radius: 8px;
+      padding: clamp(4px, 1vw, 8px) clamp(10px, 2vw, 20px);
+      border-radius: clamp(6px, 1.5vw, 12px);
     }
     .race-to {
-      font-size: 11px;
+      font-size: clamp(9px, 1.2vw, 14px);
       font-weight: 600;
       color: rgba(255,255,255,0.9);
       text-transform: uppercase;
@@ -80,7 +82,7 @@
       text-align: center;
     }
     .name {
-      font-size: 18px;
+      font-size: clamp(14px, 2vw, 24px);
       font-weight: 700;
       color: #fff;
       white-space: nowrap;
@@ -90,7 +92,7 @@
       text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
     .score {
-      font-size: 36px;
+      font-size: clamp(24px, 4vw, 48px);
       font-weight: 800;
       color: #fff;
       line-height: 1;
