@@ -69,6 +69,27 @@
       background: rgba(255,255,255,0.15);
       color: #fff;
     }
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .score-row input { flex: 1; min-width: 0; text-align: center; }
+    .score-row .btn-inc {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      font-size: 1.4rem;
+      font-weight: 700;
+      line-height: 1;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.25);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .score-row .btn-inc:hover { background: rgba(255,255,255,0.3); }
     .url-box {
       margin-top: 20px;
       padding: 12px;
@@ -118,11 +139,19 @@
     <div class="row" style="margin-top: 12px;">
       <div class="field">
         <label>Score 1</label>
-        <input type="number" id="s1" value="0" min="0" max="999">
+        <div class="score-row">
+          <button type="button" class="btn-inc" id="s1Down" aria-label="Decrease">−</button>
+          <input type="number" id="s1" value="0" min="0" max="999">
+          <button type="button" class="btn-inc" id="s1Up" aria-label="Increase">+</button>
+        </div>
       </div>
       <div class="field">
         <label>Score 2</label>
-        <input type="number" id="s2" value="0" min="0" max="999">
+        <div class="score-row">
+          <button type="button" class="btn-inc" id="s2Down" aria-label="Decrease">−</button>
+          <input type="number" id="s2" value="0" min="0" max="999">
+          <button type="button" class="btn-inc" id="s2Up" aria-label="Increase">+</button>
+        </div>
       </div>
     </div>
     <div class="live-section" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.15);">
@@ -142,6 +171,7 @@
     </div>
     <button class="btn btn-primary" id="copyUrl">Copy overlay URL</button>
     <button class="btn btn-secondary" id="openUrl">Open overlay (preview)</button>
+    <button class="btn btn-secondary" id="resetBtn" style="margin-top: 12px; background: rgba(220,80,80,0.4);">Reset fields</button>
     <div class="url-box" id="urlBox"></div>
   </div>
   <div class="toast" id="toast">URL copied to clipboard</div>
@@ -245,6 +275,32 @@
     });
     document.getElementById('openUrl').addEventListener('click', function() {
       window.open(buildUrl(), '_blank');
+    });
+    function changeScore(id, delta) {
+      var el = document.getElementById(id);
+      var n = parseInt(el.value, 10) || 0;
+      n = Math.max(0, Math.min(999, n + delta));
+      el.value = n;
+      updateUrlBox();
+      schedulePush();
+    }
+    document.getElementById('s1Up').addEventListener('click', function() { changeScore('s1', 1); });
+    document.getElementById('s1Down').addEventListener('click', function() { changeScore('s1', -1); });
+    document.getElementById('s2Up').addEventListener('click', function() { changeScore('s2', 1); });
+    document.getElementById('s2Down').addEventListener('click', function() { changeScore('s2', -1); });
+    document.getElementById('resetBtn').addEventListener('click', function() {
+      document.getElementById('team1').value = 'Team 1';
+      document.getElementById('team2').value = 'Team 2';
+      document.getElementById('raceTo1').value = '13';
+      document.getElementById('raceTo2').value = '13';
+      document.getElementById('s1').value = '0';
+      document.getElementById('s2').value = '0';
+      updateUrlBox();
+      schedulePush();
+      var t = document.getElementById('toast');
+      t.textContent = 'Fields reset';
+      t.classList.add('show');
+      setTimeout(function() { t.classList.remove('show'); }, 2000);
     });
     updateUrlBox();
   </script>
