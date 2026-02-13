@@ -297,6 +297,22 @@
       clearInterval(syncInterval);
       syncInterval = null;
     }
+    function runSyncOnce() {
+      if (!document.getElementById('liveMode').checked || !getRoomUrl()) return;
+      fetchRoom().then(function(data) {
+        if (data) applyStateToForm(data, true);
+      });
+    }
+    var syncStartDebounce;
+    function maybeStartSync() {
+      clearTimeout(syncStartDebounce);
+      syncStartDebounce = setTimeout(function() {
+        if (document.getElementById('liveMode').checked && getRoomUrl()) {
+          loadFromFirebase();
+          startSync();
+        } else stopSync();
+      }, 400);
+    }
     (function loadSaved() {
       try {
         var s = localStorage.getItem(LIVE_STORAGE);
@@ -330,10 +346,12 @@
     document.getElementById('raceTo2').addEventListener('input', function() { updateUrlBox(); schedulePushField('raceTo2'); });
     document.getElementById('s1').addEventListener('input', function() { updateUrlBox(); schedulePushField('s1'); });
     document.getElementById('s2').addEventListener('input', function() { updateUrlBox(); schedulePushField('s2'); });
+    document.getElementById('firebaseUrl').addEventListener('input', maybeStartSync);
     document.getElementById('firebaseUrl').addEventListener('change', function() {
       saveLiveSettings();
       if (document.getElementById('liveMode').checked && getRoomUrl()) { loadFromFirebase(); startSync(); } else stopSync();
     });
+    document.getElementById('roomId').addEventListener('input', maybeStartSync);
     document.getElementById('roomId').addEventListener('change', function() {
       saveLiveSettings();
       if (document.getElementById('liveMode').checked && getRoomUrl()) { loadFromFirebase(); startSync(); } else stopSync();
@@ -342,6 +360,9 @@
       saveLiveSettings();
       updateUrlBox();
       if (document.getElementById('liveMode').checked && getRoomUrl()) { loadFromFirebase(); startSync(); } else stopSync();
+    });
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') runSyncOnce();
     });
     document.getElementById('copyUrl').addEventListener('click', function() {
       var url = buildUrl();
