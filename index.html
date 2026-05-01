@@ -2,142 +2,262 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1920, height=1080, initial-scale=1">
-  <title>Scoreboard Overlay</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scorecast Broadcast Overlay</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: transparent;
-      position: relative;
     }
-    .scale-root {
-      width: 1920px;
-      height: 1080px;
-      transform-origin: center center;
+
+    :root {
+      --overlay-width: 1040px;
+      --overlay-height: 140px;
+      --edge-gap: 6px;
+      --race-offset: 36px;
+    }
+
+    .overlay-root {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: var(--overlay-width);
+      height: var(--overlay-height);
+      overflow: visible;
+    }
+
+    .race-center {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, 0);
+      min-width: 116px;
+      height: 26px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 2px solid #000;
+      border-radius: 6px;
+      background: #fff;
+      color: #000;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      white-space: nowrap;
+      letter-spacing: 0.03em;
+    }
+    .race-center b {
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .main-row {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: var(--race-offset);
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: var(--edge-gap);
     }
-    .wrap {
-      position: relative;
+
+    .player-card {
+      width: 332px;
+      height: 45px;
+      padding: 4px 10px;
       display: flex;
-      flex-direction: row;
       align-items: center;
-      width: 800px;
-      min-height: 56px;
-      padding: 10px 32px;
-      background: linear-gradient(90deg, #7c3aed 0%, #06b6d4 100%);
+      justify-content: space-between;
+      gap: 10px;
+      border: 2px solid #000;
       border-radius: 8px;
+      background: #fff;
     }
-    .row {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      gap: 4%;
-      min-width: 0;
+    .player-card.right {
+      flex-direction: row-reverse;
+    }
+    .player-name {
       flex: 1;
+      font-size: 17px;
+      font-weight: 800;
+      color: #000;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .left-group, .right-group {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      gap: 4%;
-      min-width: 0;
-      flex: 1;
-    }
-    .left-group { flex: 1; min-width: 0; justify-content: flex-start; }
-    .right-group { flex: 1; min-width: 0; justify-content: flex-end; flex-direction: row; }
-    .scores-center {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 16px;
-      flex-shrink: 0;
-    }
-    .score-block {
-      display: flex;
-      flex-direction: column;
+    .fargo {
+      min-width: 62px;
+      height: 24px;
+      padding: 0 8px;
+      border: 2px solid #000;
+      border-radius: 6px;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0;
-      flex-shrink: 0;
-      background: rgba(0,0,0,0.25);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      padding: 4px 16px;
-      border-radius: 5px;
+      background: #fff;
+      color: #000;
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
     }
-    .race-to { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.9); text-transform: uppercase; letter-spacing: 0.05em; text-align: center; }
-    .name { font-size: 22px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
-    .score { font-size: 51px; font-weight: 800; color: #fff; line-height: 1; flex-shrink: 0; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+
+    .score-wrap {
+      width: 364px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      position: relative;
+      overflow: visible;
+    }
+    .score-col {
+      width: 126px;
+      height: 64px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+    .score-box {
+      width: 126px;
+      height: 64px;
+      border: 2px solid #000;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: #000;
+      font-size: 46px;
+      font-weight: 860;
+      line-height: 1;
+    }
+    .score-divider {
+      font-size: 34px;
+      font-weight: 800;
+      color: #000;
+      line-height: 1;
+    }
+
+    .race-split {
+      position: absolute;
+      left: 50%;
+      top: -30px;
+      transform: translateX(-50%);
+      min-width: 104px;
+      height: 24px;
+      padding: 0 10px;
+      border: 2px solid #000;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: #000;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      white-space: nowrap;
+      letter-spacing: 0.03em;
+    }
   </style>
 </head>
 <body>
-  <div class="scale-root" id="scaleRoot">
-  <div class="wrap">
-    <div class="row">
-      <div class="left-group">
-        <span class="name" id="team1">Team 1</span>
+  <div class="overlay-root">
+    <div class="race-center" id="raceCenter">Race To <b id="raceCenterValue">-</b></div>
+
+    <div class="main-row">
+      <div class="player-card left">
+        <span class="player-name" id="p1aName">Player</span>
+        <span class="fargo" id="fargo1a">---</span>
       </div>
-      <div class="scores-center">
-        <div class="score-block">
-          <span class="race-to" id="raceToLabel">Race to 13</span>
-          <span class="score" id="score1">0</span>
+
+      <div class="score-wrap">
+        <div class="score-col">
+          <span class="race-split" id="raceScoreLeft">Race To -</span>
+          <span class="score-box" id="score1">0</span>
         </div>
-        <div class="score-block">
-          <span class="race-to" id="raceToLabel2">Race to 13</span>
-          <span class="score" id="score2">0</span>
+        <span class="score-divider">-</span>
+        <div class="score-col">
+          <span class="race-split" id="raceScoreRight">Race To -</span>
+          <span class="score-box" id="score2">0</span>
         </div>
       </div>
-      <div class="right-group">
-        <span class="name" id="team2">Team 2</span>
+
+      <div class="player-card right">
+        <span class="player-name" id="p2aName">Player</span>
+        <span class="fargo" id="fargo2a">---</span>
       </div>
     </div>
   </div>
-  </div>
+
   <script>
     (function() {
-      var DESIGN_W = 1920, DESIGN_H = 1080;
-      function applyScale() {
-        var w = window.innerWidth, h = window.innerHeight;
-        var scaleFit = Math.max(w / DESIGN_W, h / DESIGN_H);
-        var scale = Math.max(1, scaleFit);
-        var el = document.getElementById('scaleRoot');
-        if (el) el.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
-      }
-      var root = document.getElementById('scaleRoot');
-      if (root) {
-        root.style.position = 'absolute';
-        root.style.left = '50%';
-        root.style.top = '50%';
-      }
-      applyScale();
-      window.addEventListener('resize', applyScale);
-
       var params = new URLSearchParams(window.location.search);
       var room = params.get('room');
       var dbUrl = params.get('db') ? decodeURIComponent(params.get('db')) : '';
 
+      function asBool(v, fallback) {
+        if (v == null) return fallback;
+        var s = String(v).toLowerCase();
+        if (s === '1' || s === 'true' || s === 'yes' || s === 'on') return true;
+        if (s === '0' || s === 'false' || s === 'no' || s === 'off') return false;
+        return fallback;
+      }
+
       function applyState(data) {
         var d = data || {};
-        var team1 = (d.team1 != null ? d.team1 : 'Team 1').toString();
-        var team2 = (d.team2 != null ? d.team2 : 'Team 2').toString();
+        var p1a = (d.p1a != null ? d.p1a : d.team1 != null ? d.team1 : 'Player').toString();
+        var p2a = (d.p2a != null ? d.p2a : d.team2 != null ? d.team2 : 'Player').toString();
+        var f1a = (d.fargo1a != null ? d.fargo1a : '').toString();
+        var f2a = (d.fargo2a != null ? d.fargo2a : '').toString();
         var s1 = (d.s1 != null ? d.s1 : 0).toString();
         var s2 = (d.s2 != null ? d.s2 : 0).toString();
-        var raceTo1 = (d.raceTo1 != null ? d.raceTo1 : 13).toString();
-        var raceTo2 = (d.raceTo2 != null ? d.raceTo2 : 13).toString();
-        document.getElementById('raceToLabel').textContent = 'Race to ' + raceTo1;
-        document.getElementById('raceToLabel2').textContent = 'Race to ' + raceTo2;
-        document.getElementById('team1').textContent = team1;
-        document.getElementById('team2').textContent = team2;
+        var raceTo1 = (d.raceTo1 != null ? d.raceTo1 : '-').toString();
+        var raceTo2 = (d.raceTo2 != null ? d.raceTo2 : '-').toString();
+        var showRace = asBool(d.showRace, true);
+        var showFargo = asBool(d.showFargo, false);
+        var sameRace = raceTo1 === raceTo2;
+        var raceCenter = sameRace ? raceTo1 : raceTo1 + '/' + raceTo2;
+
+        document.getElementById('p1aName').textContent = p1a;
+        document.getElementById('p2aName').textContent = p2a;
+        document.getElementById('fargo1a').textContent = f1a || '---';
+        document.getElementById('fargo2a').textContent = f2a || '---';
         document.getElementById('score1').textContent = s1;
         document.getElementById('score2').textContent = s2;
+
+        document.getElementById('raceCenterValue').textContent = raceCenter || '-';
+        document.getElementById('raceScoreLeft').textContent = 'Race To ' + raceTo1;
+        document.getElementById('raceScoreRight').textContent = 'Race To ' + raceTo2;
+
+        if (!showRace) {
+          document.getElementById('raceCenter').style.display = 'none';
+          document.getElementById('raceScoreLeft').style.display = 'none';
+          document.getElementById('raceScoreRight').style.display = 'none';
+        } else if (sameRace) {
+          document.getElementById('raceCenter').style.display = 'inline-flex';
+          document.getElementById('raceScoreLeft').style.display = 'none';
+          document.getElementById('raceScoreRight').style.display = 'none';
+        } else {
+          document.getElementById('raceCenter').style.display = 'none';
+          document.getElementById('raceScoreLeft').style.display = 'inline-flex';
+          document.getElementById('raceScoreRight').style.display = 'inline-flex';
+        }
+
+        document.getElementById('fargo1a').style.display = showFargo ? 'inline-flex' : 'none';
+        document.getElementById('fargo2a').style.display = showFargo ? 'inline-flex' : 'none';
       }
 
       if (room && dbUrl) {
@@ -151,12 +271,16 @@
         var t1 = params.get('team1');
         var t2 = params.get('team2');
         applyState({
-          team1: t1 ? decodeURIComponent(t1) : 'Team 1',
-          team2: t2 ? decodeURIComponent(t2) : 'Team 2',
+          p1a: params.get('p1a') || (t1 ? decodeURIComponent(t1) : 'Player'),
+          p2a: params.get('p2a') || (t2 ? decodeURIComponent(t2) : 'Player'),
+          fargo1a: params.get('fargo1a') || '',
+          fargo2a: params.get('fargo2a') || '',
+          showRace: params.get('showRace'),
+          showFargo: params.get('showFargo'),
           s1: params.get('s1') || '0',
           s2: params.get('s2') || '0',
-          raceTo1: params.get('raceTo1') || params.get('raceTo') || '13',
-          raceTo2: params.get('raceTo2') || params.get('raceTo') || '13'
+          raceTo1: params.get('raceTo1') || params.get('raceTo') || '-',
+          raceTo2: params.get('raceTo2') || params.get('raceTo') || '-'
         });
       }
     })();
